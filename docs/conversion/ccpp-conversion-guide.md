@@ -35,10 +35,12 @@ Make sure you have github forks for both ESCOMP/CAM-SIMA and ESCOMP/atmospheric_
 To begin, fork ESCOMP/CAM-SIMA:
 ![text](fork-cam-sima.png "Forking CAM-SIMA")
 
-```bash
-git clone  https://github.com/<GithubUserID>/CAM-SIMA
-cd CAM-SIMA
+And select the `Create new fork` option.  This will bring you to the "Create new fork" screen:
+![text](fork-cam-sima-2.png "Forking CAM-SIMA")
 
-```
+!!! note Uncheck the "Copy the `main` branch only" option
 
-NOTE: As you make changes and want to commit them to your github repos, you’ll be managing two separate repos.  When you issue git commands, be aware of where you are in your code tree.  If you want to see changes in CAM-SIMA, you can issue a “git status” in the main CAM-SIMA directory.  If you want to see changes in the atmospheric_physics repo, make sure you are in src/physics/ncar_ccpp before you issue the “git status” command.  All other git commands will be relative to your current working directory as well.
+ Failure to uncheck this will prevent you from pulling in updates from the `development` branch easily.
+
+As you make changes and want to commit them to your github repos, you’ll be managing two separate repos.  When you issue git commands, be aware of where you are in your code tree.  If you want to see changes in CAM-SIMA, you can issue a `git status` in the main CAM-SIMA directory.  If you want to see changes in the atmospheric_physics repo, make sure you are in `src/physics/ncar_ccpp` before you issue the `git status` command.  All other git commands will be relative to your current working directory as well.
+
