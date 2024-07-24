@@ -1,6 +1,11 @@
-# CAM-SIMA Run Process
+# Run process
 
-![text](run-sequence.gif "CAM-SIMA run sequence")
+<figure markdown="span">
+  ![text](figures/run-sequence.gif "CAM-SIMA run sequence"){width="80%"}
+  <figcaption>CAM-SIMA run sequence*</figcaption>
+</figure>
+
+*Static images can be found at the [bottom](#static-run-sequence-images) of this page
 
 ## CAM-SIMA API
 Upon running `./case.submit` the core CAM-SIMA driver code* is in `$CAM-SIMA/src/control/cam_comp.F90`. This section lays out each of the subroutines within `cam_comp.F90`.
@@ -51,10 +56,10 @@ The subroutines in `cam_comp.F90` are set up to mirror the phases of the [Common
 1. `cam_ctrl_init` (`src/control/cam_control_mod.F90`): Sets the module-level run configuration variables; logs configurations to the atm log
 1. `cam_ctrl_set_orbit` (`src/control/cam_control_mod.F90`): Sets the module-level orbital variables
 1. `timemgr_init (`src/utils/time_manager.F90`): Initializes the time manager; logs configurations to the atm log
-1. `read_namelist` (`src/control/runtime_opts.F90`): Reads all namelists for the run, including auto-generated scheme namelists (see [build process](/design/cam-build-process/#cam-sima-source-and-namelist-generation-buildnml-workflow))
+1. `read_namelist` (`src/control/runtime_opts.F90`): Reads all namelists for the run, including auto-generated scheme namelists (see [build process](cam-build-process.md/#cam-sima-source-and-namelist-generation-buildnml-workflow))
 1. `cam_ctrl_set_physics_type` (`src/control/cam_control_mod.F90`): sets module-level configuration for variables for simple physics and moist physics schemes; logs configurations to atm log
 1. `cam_initfiles_open` (`src/control/cam_initfiles.F90`): Opens initial or restart file, and topography file if specified
-1. `cam_register_constituents` (`src/control/cam_comp.F90`): Sets the total number and advected number of [constituents](/design/constituents); currently ALWAYS adds water vapor as constituent (expected by the SE dycore)
+1. `cam_register_constituents` (`src/control/cam_comp.F90`): Sets the total number and advected number of [constituents](constituents.md); currently ALWAYS adds water vapor as constituent (expected by the SE dycore)
 1. `air_composition_init` (`src/data/air_composition.F90`): Initializes air-composition-dependent model constants
 1. `model_grid_init` (`src/dynamics/<dycore>/dyn_grid.F90`): Initializes model grids and decompositions
 1. `cam_ccpp_initialize_constituents` (`$CASE/bld/atm/obj/ccpp/cam_ccpp_cap.F90`): initializes the constituent data array; after this point, we cannot add new constituents
@@ -120,7 +125,7 @@ The routine calls the following subroutines (locations) in this order:
 
 `cam_timestep_final` calls the following subroutines (locations):
 
-1. [History](/design/history) routines. If it's not the last (half) timestep,
+1. [History](history.md) routines. If it's not the last (half) timestep,
     1. `history_write_files` (`src/history/cam_history.F90`): Writes fields to user-configured history files (if applicable)
     1. `history_wrap_up` (`src/history/cam_history.F90`): Closes files and zeros buffers as necessary
 1. `phys_timestep_final` (`src/physics/utils/phys_comp.F90`):
@@ -141,3 +146,10 @@ The routine calls the following subroutines (locations) in this order:
 1. `phys_final` (`src/physics/utils/phys_comp.F90`): calls "final" phase of all schemes in the suite definition file (SDF)
 1. `stepon_final` (`src/dynamics/<dycore>/stepon.F90`): finalize dycore (doesn't currently do anything)
 1. `atm2hub_deallocate` and `hub2atm_deallocate` (`src/control/camsrfexch.F90`): deallocate cam_in/cam_out objects
+
+## *Static run sequence images*
+
+![text](figures/run-sequence-api.png "CAM-SIMA run sequence from CAM API perspective")
+![text](figures/run-sequence-physics.png "CAM-SIMA run sequence from physics perspective")
+![text](figures/run-sequence-dynamics.png "CAM-SIMA run sequence from dynamics perspective")
+![text](figures/run-sequence-history.png "CAM-SIMA run sequence from history perspective")

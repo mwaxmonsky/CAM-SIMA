@@ -66,7 +66,7 @@ This section can be removed when constituents are documented in the CCPP Framewo
 ### Constituent object (Fortran)
 The constituent object (found in `$CAM-SIMA/ccpp_framework/src/ccpp_constituent_prop_ mod.F90`) is a flexible and extendable means of containing necessary constituent data for the framework. The primary object is `ccpp_model_constituents_t`.
 
-![text](constituents-classes.PNG "CCPP Framework constituent object(s)")
+![text](figures/constituents-classes.PNG "CCPP Framework constituent object(s)")
 
 This object, importantly, contains the following properties (for which there is metadata; CCPP standard name in parenthesis):
 

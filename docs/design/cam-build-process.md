@@ -1,4 +1,4 @@
-# CAM-SIMA Build Process
+# Build process
 
 In order to describe the build process, we need to define several source and build directories:
 
@@ -38,7 +38,7 @@ Given the context above, the following is the CAM-SIMA build sequence:
     - Call the [CCPP Framework](https://ccpp-techdoc.readthedocs.io/en/v6.0.0/) to generate glue code (CAPS), (if required).
 
 ## CAM-SIMA source and namelist generation (buildnml) workflow
-![text](buildnml_workflow.jpg "CAM-SIMA buildnml workflow")
+![text](figures/buildnml_workflow.jpg "CAM-SIMA buildnml workflow")
 
 The diagram above displays everything that occurs when CAM-SIMA's `buildnml` is called by CIME, which occurs after the user calls `preview_namelists`, `case.build`, or `case.submit`.
 

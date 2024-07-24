@@ -1,4 +1,4 @@
-# History & Model Output
+# History & model output
 
 CAM-SIMA history is the mechanism for configuring and generating diagnostic output from a model run. It is also used to generate initial-data files and aids in the model-restart process by saving the state of diagnostic fields whose processing window (e.g., averaging, standard deviation) crosses a restart-write cycle. This page describes the implementation of CAM-SIMA history in CAM-SIMA.
 
@@ -15,77 +15,16 @@ CAM-SIMA history is the mechanism for configuring and generating diagnostic outp
 | hist_add_avg_fields <br />hist_add_inst_fields<br />hist_add_min_fields<br /> hist_add_max_field<br /> hist_add_var_field<br /> hist_remove_fields| These configuration keywords add/remove fields to the specified volume with the indicated accumulation flag (average, instantaneous, minimum, maximum, standard deviation). The closest CAM7 equivalent is “finclX”|&hist_config_arrays_nl<br/>&ensp;hist_num_avg_fields<br/>&ensp;hist_num_inst_fields<br/>&ensp;hist_num_min_fields<br/>&ensp;hist_num_max_fields<br/>&ensp;hist_num_var_fields<br/><br/>&hist_file_config_nl<br/>&ensp;hist_avg_fields<br/>&ensp;hist_inst_fields<br/>&ensp;hist_min_fields<br/>&ensp;hist_max_fields<br/>&ensp;hist_var_fields|
 | hist_file_type        | This keyword determines the type of file. Options are: “history,” “satellite,” and “initial_value”<br/>Defaults to “history” | &hist_file_config_nl<br/>&ensp;hist_file_type |
 | hist_max_frames       | Indicates the maximum number of samples/frames that can be written to a file before that file is considered “full”. The CAM7 equivalent is “mfilt”.<br/>Defaults to 1 for h0 and 30 for all other volumes. | &hist_file_config_nl<br/>&ensp;hist_max_frames |
-| hist_output_frequency | Specifies the frequency of writes to the volume. The syntax is “*” where “time_period” can be: steps, seconds, minutes, hours, days, months, years. The closest CAM7 equivalent is “nhtfrq”. | &hist_file_config_nl<br/>&ensp;hist_output_frequency |
+| hist_output_frequency | Specifies the frequency of writes to the volume. The syntax is "<integer\>*<time period\>" where “time_period” can be: steps, seconds, minutes, hours, days, months, years. The closest CAM7 equivalent is “nhtfrq”. | &hist_file_config_nl<br/>&ensp;hist_output_frequency |
 | hist_precision        | Denotes the precision for the volume. Options are "REAL32" and "REAL64".<br/>Defaults to "REAL32" | &hist_file_config_nl<br/>&ensp;hist_precision |
-| hist_write_nstep0     | Specifies the template for the filename for the volume. <br/> Defaults to "%c.cam.%u.%y-%m-%d-%s.nc" where "%c" is the case name, "%u" is the volume, "%y" is the year, "%m" is the month, "%d" is the day, and "%s" is the seconds | &hist_file_config_nl<br/>&ensp;hist_filename_spec
+| hist_write_nstep0     | Indicates whether or not to write the nstep=0 sample to the volume.<br/>Defaults to .false.       | &hist_file_config_nl<br/>&ensp;hist_write_nstep0 |
+| hist_filename_template| Specifies the template for the filename for the volume. <br/> Defaults to "%c.cam.%u.%y-%m-%d-%s.nc" where "%c" is the case name, "%u" is the volume, "%y" is the year, "%m" is the month, "%d" is the day, and "%s" is the number of seconds since midnight GMT, with the timestamp itself representing the model time when the file is created.| &hist_file_config_nl<br/>&ensp;hist_filename_spec
 
 - `hist_config.py` also contains the `HistoryVolConfig` class (all the info pertaining to a single history file), the `HistoryConfig` class (all the history configuration information including a dict of `HistoryVolConfig` objects), and helper classes.
 - The `HistoryConfig` object is created in `buildnml` out of entries in `user_nl_cam` and written to `run/atm_in`.
 - In order to ensure that all relevant runtime (namelist) values show up in `atm_in`, the `HistoryConfig` object must contain all the logic in setting default values.
 
-![text](hist_config_classes.PNG "CAM-SIMA history config class diagram")
-
-**Example**
-Take the following sample `user_nl_cam`:
-```
-hist_output_frequency;h1: 5*ndays
-hist_max_frames;h1: 3
-hist_add_inst_fields;h1: U
-hist_add_inst_fields;h1: V, Q
-hist_precision;h1: REAL64
-hist_filename_spec;h1: my-history-file%m-%d
-hist_write_nstep0;h1: .false.
-```
-
-It will be parsed by hist_config.py and this will be the relevant section of atm_in:
-```
-&hist_config_arrays_nl
-    hist_num_inst_fields = 3
-    hist_num_avg_fields = 2
-    hist_num_min_fields = 0
-    hist_num_max_fields = 0
-    hist_num_var_fields = 0
-/
-
-&hist_file_config_nl
-    hist_volume = 'h0'
-    hist_avg_fields = 'T', 'Q'
-    hist_max_frames = 1
-    hist_output_frequency = '1*month'
-    hist_precision = 'REAL32'
-    hist_file_type = 'history'
-    hist_filename_spec = '%c.cam.%u.%y-%m-%d-%s.nc'
-    hist_write_nstep0 = .false.
-/
-
-&hist_file_config_nl
-    hist_volume = 'h1'
-    hist_inst_fields = 'U', ‘V’, ‘Q’
-    hist_max_frames = 3
-    hist_output_frequency = '5*ndays'
-    hist_precision = 'REAL64'
-    hist_file_type = 'history'
-    hist_filename_spec = 'my-history-file%m-%d'
-    hist_write_nstep0 = .false.
-/
-```
-
-In plain English, a one-month run with these history configuration will result in a total of three files that will look something like these:
-- my-history-file01-06.nc
-    - This file will contain instantaneous output for U, V, and Q (eastward_wind, northward_wind, and water vapor)
-    - It will contain three frames, one at each of the following times:
-        - 0001-01-06 (time=5)
-        - 0001-01-11 (time=10)
-        - 0001-01-16 (time=15)
-- my-history-file01-21.nc
-    - This file will contain instantaneous output for U, V, and Q (eastward_wind, northward_wind, and water vapor)
-    - It will contain three frames, one at each of the following times:
-        - 0001-01-21 (time=20)
-        - 0001-01-26 (time=25)
-        - 0001-01-31 (time=30)
-- <case-name>.cam.h0a.0001-02-01-00000.nc
-    - This file will contain averaged output for T and Q (air_temperature and water vapor)
-    - It will have one frame with the time calculated at the midpoint of the month
+![text](figures/hist_config_classes.PNG "CAM-SIMA history config class diagram")
 
 ### Setting up the history data structures
 
@@ -95,7 +34,7 @@ In plain English, a one-month run with these history configuration will result i
 - The `hist_file_t` object contains information about the configuration options for a given history volume. This includes the maximum number of frames that can be written to the file, the current number of frames on the file, the name of the file, and all of the history fields to be written to the file. It also contains methods to populate the field lists (`config_set_up_fields`), set up the metadata of the file (`config_define_file`), and write history fields to the file (`config_write_time_dependent_variables`).
 - Each `hist_file_t` object contains both a hash table and allocatable field list to keep track of the fields written to the file. The core class for each of these is the `hist_field_info_t` (in `src/history/buffers/src/hist_field.F90`), which contains information about a history field. This includes the field names, the accumulate flag (average, instantaneous, minimum, etc), units, type, dimensions, and fill value. It also includes the buffer(s) (type is/are `hist_buffer_t`) that will and do hold the actual data.
 
-![text](cam_history_classes"CAM-SIMA history Fortran class diagram")
+![text](figures/cam_history_classes"CAM-SIMA history Fortran class diagram")
 
 ## Populating the possible field list
 The possible fields to be output by the history infrastructure are tracked in `cam_history.F90` via the `possible_field_list` hash table. It is populated during init time by calls to the subroutine `history_add_field` (found in `src/history/cam_history.F90`). “Init time,” means that all calls to `history_add_field` must occur during the execution of `cam_init` (found in `src/control/cam_comp.F90`).
@@ -168,7 +107,7 @@ The bolded step #3 above occurs any time the criteria for #1 is satisfied. At th
 ```
   call hist_configs(file_idx)%write_time_dependent_variables(file_idx, restart)
 ```
-It is during this call that we increment the number of samples written for this volume and actual write the data held within the buffer(s) to the netcdf file (as well as the time-dependent metadata for the fields).
+It is during this call that we increment the number of samples written for this volume and actually write the data held within the buffer(s) to the netcdf file (as well as the time-dependent metadata for the fields).
 
 ## Defining history restart files
 *Restarts not yet implemented in CAM-SIMA*
