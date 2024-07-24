@@ -14,7 +14,7 @@ The subroutines in `cam_comp.F90` are set up to mirror the phases of the [Common
 \* `cam_comp.F90` subroutines are called by the NUOPC cap: `$CAM-SIMA/src/cpl/nuopc/atm_comp_nuopc.F90`
 
 ### cam_init
-`cam_init` sets up the metadata and configuration objects/modules for the run. It is called by `atm_comp_nuopc.F90` at startup. Below are the variables passed in:
+`cam_init` sets up the metadata and configuration objects/modules for the run. It is called once at startup. Below are the variables passed in:
 
 | Variable (intent)   | Definition                                                  | How it's Used                                       |
 | :------------------ | :---------------------------------------------------------- | :-------------------------------------------------- |
@@ -64,7 +64,7 @@ The subroutines in `cam_comp.F90` are set up to mirror the phases of the [Common
 1. `model_grid_init` (`src/dynamics/<dycore>/dyn_grid.F90`): Initializes model grids and decompositions
 1. `cam_ccpp_initialize_constituents` (`$CASE/bld/atm/obj/ccpp/cam_ccpp_cap.F90`): initializes the constituent data array; after this point, we cannot add new constituents
 1. `dyn_init` (`src/dynamics/<dycore>/dyn_comp.F90`): Initializes the dynamical core
-1. `atm2hub_alloc` and `hub2atm_alloc` (`src/control/camsrfexch.F90`): Allocate and set up surface exchange data
+1. `atm2hub_alloc` and `hub2atm_alloc` (`src/control/camsrfexch.F90`): Allocates and sets up surface exchange data
 1. `phys_init` (`src/physics/utils/phys_comp.F90`): Initializes physics (includes call to CCPP cap to run init phases of schemes in the Suite Definition File (SDF)
 1. `stepon_init` (`src/dynamics/<dycore>/stepon.F90`): Initializes dynamics <--> physics coupling
 
@@ -75,18 +75,20 @@ The routine calls the following subroutines (locations) in this order:
 
 1. `stepon_timestep_init` (`src/dynamics/<dycore>/stepon.F90`): First phase of dynamics (couple from dynamics to physics); also returns timestep for physics
 1. `phys_timestep_init` (`src/physics/utils/phys_comp.F90`):
-    1. Read data from initial data file (for the null dycore, this means we're reading most physics input variables (as defined in `src/data/registry.xml`) from the ncdata file; for the SE dycore, we are reading in any variables not marked as initialized by the SE dycore initialization)
-    1. Call the CCPP cap to run timestep_init phases of all schemes in the user-specified suite definition file (SDF)
+    1. Read un-initialized data from initial data file
+        - For the null dycore, this means we're reading most physics input variables (as defined in `src/data/registry.xml`) from the ncdata file
+        - For the SE dycore, we are reading in any variables not marked as initialized by the SE dycore initialization
+    1. Calls the CCPP cap to run timestep_init phases of all schemes in the user-specified SDF
 
 ### cam_run1
 
-`cam_run1` is the first "run" phase called in the physics loop. It is called BEFORE the mediator/coupler and calls the following subroutine (location):
+`cam_run1` is the first "run" phase called in the physics loop. It is called every timestep BEFORE the mediator/surface coupler and calls the following subroutine (location):
 
-1. `phys_run1` (`src/physics/utils/phys_comp.F90`): Calls the run phase for all physics schemes in the "physics_before_coupler" group in the suite definition file (SDF)
+1. `phys_run1` (`src/physics/utils/phys_comp.F90`): Calls the run phase for all physics schemes in the "physics_before_coupler" group in the SDF
 
 ### cam_run2
 
-`cam_run2` is the second "run" phase called in the physics loop. It is called AFTER the mediator/coupler. Input/output variables:
+`cam_run2` is the second "run" phase called in the physics loop. It is called every timestep AFTER the mediator/coupler. Input/output variables:
 
 | Variable (intent)   | Definition                                                  | How it's Used                |
 | :------------------ | :---------------------------------------------------------- | :--------------------------- |
@@ -95,16 +97,16 @@ The routine calls the following subroutines (locations) in this order:
 
 `cam_run2` calls these subroutines (locations):
 
-1. `phys_run2` (`src/physics/utils/phys_comp.F90`): Calls the run phase for all physics schemes in the "physics_after_coupler" group in the suite definition file (SDF)
+1. `phys_run2` (`src/physics/utils/phys_comp.F90`): Calls the run phase for all physics schemes in the "physics_after_coupler" group in the SDF
 1. `stepon_run2` (`src/dynamics/<dycore>/stepon.F90`): The second phase of dynamics (couple from physics to dynamics)
 
 ### cam_run3
 
-`cam_run3` is the third "run" phase called in the physics loop. It is called AFTER cam_run3 and BEFORE cam_run4 (unsurprisingly). In/out variables:
+`cam_run3` is the third "run" phase called in the physics loop. It is called every timestep AFTER cam_run3 and BEFORE cam_run4 (unsurprisingly). In/out variables:
 
 | Variable (intent)   | Definition                                                  | How it's Used                |
 | :------------------ | :---------------------------------------------------------- | :--------------------------- |
-| cam_out (inout)     | surface exchange object - output from CAM-SIMA              | Passed into stepon_run2      |
+| cam_out (inout)     | surface exchange object - output from CAM-SIMA              | Passed into stepon_run3      |
 
 `cam_run3` calls the following subroutine (location):
 
@@ -112,7 +114,7 @@ The routine calls the following subroutines (locations) in this order:
 
 ### cam_run4
 
-`cam_run4` currently does nothing!
+`cam_run4` currently does nothing! (but it is called every timestep)
 
 ### cam_timestep_final
 
@@ -129,12 +131,12 @@ The routine calls the following subroutines (locations) in this order:
     1. `history_write_files` (`src/history/cam_history.F90`): Writes fields to user-configured history files (if applicable)
     1. `history_wrap_up` (`src/history/cam_history.F90`): Closes files and zeros buffers as necessary
 1. `phys_timestep_final` (`src/physics/utils/phys_comp.F90`):
-    1. Calls the timestep_final phase for all physics schemes in the suite definition file (SDF)
+    1. Calls the timestep_final phase for all physics schemes in the SDF
     1. If `ncdata_check` is set in `user_nl_cam`, calls `physics_check_data` (`$CASE/bld/atm/obj/phys_init/physics_inputs.F90`) to perform snapshot checking
 
 ### cam_final
 
-`cam_final` is called at the end of the model execution. In/out variables:
+`cam_final` is called once at the end of the model execution. In/out variables:
 
 | Variable (intent)   | Definition                                                  | How it's Used  |
 | :------------------ | :---------------------------------------------------------- | :------------- |
@@ -143,8 +145,8 @@ The routine calls the following subroutines (locations) in this order:
 
 `cam_final` calls the following subroutines (locations):
 
-1. `phys_final` (`src/physics/utils/phys_comp.F90`): calls "final" phase of all schemes in the suite definition file (SDF)
-1. `stepon_final` (`src/dynamics/<dycore>/stepon.F90`): finalize dycore (doesn't currently do anything)
+1. `phys_final` (`src/physics/utils/phys_comp.F90`): calls "final" phase of all schemes in the SDF
+1. `stepon_final` (`src/dynamics/<dycore>/stepon.F90`): finalizes dycore (doesn't currently do anything)
 1. `atm2hub_deallocate` and `hub2atm_deallocate` (`src/control/camsrfexch.F90`): deallocate cam_in/cam_out objects
 
 ## *Static run sequence images*

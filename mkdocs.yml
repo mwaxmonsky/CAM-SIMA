@@ -27,12 +27,16 @@ theme:
         icon: material/brightness-4
         name: Switch to system preference
   name: material
+  features:
+    - content.code.copy
 
 markdown_extensions:
   - def_list
   - tables
   - pymdownx.tasklist:
       custom_checkbox: true
+  - attr_list
+  - md_in_html
 
 extra_css:
   - stylesheets/extra.css

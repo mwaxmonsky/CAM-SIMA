@@ -93,8 +93,6 @@ Given CCPP-compliant physics schemes and one or more SDF, the framework generate
 - `ccpp_datatable.xml`: consolidates metadata into an XML file to be used as desired by the host model
 
 ## Code Structure
-Given the context above, this section describes how the CCPP is integrated into CAM-SIMA.
-
 How CAM-SIMA and the CCPP come together:
 ![text](figures/ccpp-framework-in-cam-sima.PNG "CCPP design in CAM-SIMA")
 
