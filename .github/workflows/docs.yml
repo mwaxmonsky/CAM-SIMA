@@ -16,9 +16,13 @@ jobs:
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+
       - name: Setup Python
-      - run: sudo apt install -y python3 && pip install mkdocs-material
-      - run: echo "cache_id=$(date --utc '+%F')" >> $GITHUB_ENV
+      - run: |
+             sudo apt install -y python3 && pip install mkdocs-material
+             echo "cache_id=$(date --utc '+%F')" >> $GITHUB_ENV
+
+      - name: Push docs to gh-pages
       - uses: actions/cache@v4
         with:
           key: mkdocs-material-${{ env.cache_id }}
