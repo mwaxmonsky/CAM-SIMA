@@ -22,12 +22,14 @@ jobs:
              sudo apt install -y python3 && pip install mkdocs-material
              echo "cache_id=$(date --utc '+%F')" >> $GITHUB_ENV
 
-      - name: Push docs to gh-pages
+      - name: Configure cache
         uses: actions/cache@v4
         with:
           key: mkdocs-material-${{ env.cache_id }}
           path: .cache
           restore-keys: |
             mkdocs-material-
+
+      - name: Deploy to gh-pages
         run: mkdocs gh-deploy
 
