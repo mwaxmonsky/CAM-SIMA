@@ -40,7 +40,7 @@ And select the `Create new fork` option.  This will bring you to the "Create new
 
 !!! warning "Uncheck the \"Copy the `main` branch only\" option"
 
- Failure to uncheck this will prevent you from pulling in updates from the `development` branch easily.
+    Failure to uncheck this will prevent you from pulling in updates from the `development` branch easily.
 
 As you make changes and want to commit them to your github repos, you will be managing two separate repos.  When you issue git commands, be aware of where you are in your code tree.  If you want to see changes in CAM-SIMA, you can issue a `git status` in the main CAM-SIMA directory.  If you want to see changes in the atmospheric_physics repo, make sure you are in `src/physics/ncar_ccpp` before you issue the `git status` command.  All other git commands will be relative to your current working directory as well.
 
@@ -61,7 +61,7 @@ SCHEMES = the base level routines which are currently called bby the CAM interfa
 
 !!! note "`<module_name>` should be the full name of your module"
 
- For example, if you are converting the `tj2016` `precip_tend` function, then `<module_name>` would be `tj2016_precip_tend`.
+    For example, if you are converting the `tj2016` `precip_tend` function, then `<module_name>` would be `tj2016_precip_tend`.
 
 Parameterizations may not need all of the routines listed below and do not need to supply them if they are not needed.  However, all subroutine input/output arguments need to have an `intent` label (you may refer to `src/atmos_phys/kessler` and `src/atmos_phys/held_suarez` for specific examples).
 
