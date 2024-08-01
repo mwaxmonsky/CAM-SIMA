@@ -38,7 +38,7 @@ To begin, fork ESCOMP/CAM-SIMA:
 And select the `Create new fork` option.  This will bring you to the "Create new fork" screen:
 ![text](fork-cam-sima-2.png "Forking CAM-SIMA")
 
-!!! warning "Uncheck the \"Copy the `main` branch only\" option"
+i!!! warning "Uncheck the "Copy the `main` branch only" option"
 
     Failure to uncheck this will prevent you from pulling in updates from the `development` branch easily.
 
@@ -57,7 +57,7 @@ Many CAM schemes have more than one `run` function contained within them.  To se
 
 SCHEMES = the base level routines which are currently called bby the CAM interface routines.
 
-1) Convert the original routines in the file you copied over to `src/physics/ncar_ccpp/<schemename>/<module_name>.F90` to one or more of the 5 following subroutines.  These will be called by CCPP in CAM-SIMA and in CAM6.
+1. Convert the original routines in the file you copied over to `src/physics/ncar_ccpp/<schemename>/<module_name>.F90` to one or more of the 5 following subroutines.  These will be called by CCPP in CAM-SIMA and in CAM6.
 
 !!! note "`<module_name>` should be the full name of your module"
 
