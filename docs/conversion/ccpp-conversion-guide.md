@@ -38,7 +38,7 @@ To begin, fork ESCOMP/CAM-SIMA:
 And select the `Create new fork` option.  This will bring you to the "Create new fork" screen:
 ![text](fork-cam-sima-2.png "Forking CAM-SIMA")
 
-i!!! warning "Uncheck the "Copy the `main` branch only" option"
+!!! warning "Uncheck the "Copy the `main` branch only" option"
 
     Failure to uncheck this will prevent you from pulling in updates from the `development` branch easily.
 
