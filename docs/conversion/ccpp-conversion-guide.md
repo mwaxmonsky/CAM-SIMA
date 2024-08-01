@@ -38,10 +38,45 @@ To begin, fork ESCOMP/CAM-SIMA:
 And select the `Create new fork` option.  This will bring you to the "Create new fork" screen:
 ![text](fork-cam-sima-2.png "Forking CAM-SIMA")
 
-!!! note "Uncheck the \"Copy the `main` branch only\" option"
+!!! warning "Uncheck the \"Copy the `main` branch only\" option"
 
  Failure to uncheck this will prevent you from pulling in updates from the `development` branch easily.
 
 As you make changes and want to commit them to your github repos, you will be managing two separate repos.  When you issue git commands, be aware of where you are in your code tree.  If you want to see changes in CAM-SIMA, you can issue a `git status` in the main CAM-SIMA directory.  If you want to see changes in the atmospheric_physics repo, make sure you are in `src/physics/ncar_ccpp` before you issue the `git status` command.  All other git commands will be relative to your current working directory as well.
 
+### Opttional: pre-split tthe module
+
+Many CAM schemes have more than one `run` function contained within them.  To seperate them into seperate files and test them:
+ - In the copied atmospheric physics directory, create a seperate submodule for each parameterization which has `run` method.
+   - An easy way to see what routines need to be seperated out is to look at the `use` statement(s) for your parameterization.  If more than one routine is listed, you most likely will need to seperate these out.
+- If there is shared module level data or shared subroutines which are called internally, put these all in a `<schemename>_common.F90` module.
+
+## CCPP-ization
+
+### Convert the code in the "portable" parameterization layer
+
+SCHEMES = the base level routines which are currently called bby the CAM interface routines.
+
+1) Convert the original routines in the file you copied over to `src/physics/ncar_ccpp/<schemename>/<module_name>.F90` to one or more of the 5 following subroutines.  These will be called by CCPP in CAM-SIMA and in CAM6.
+
+!!! note "`<module_name>` should be the full name of your module"
+
+ For example, if you are converting the `tj2016` `precip_tend` function, then `<module_name>` would be `tj2016_precip_tend`.
+
+Parameterizations may not need all of the routines listed below and do not need to supply them if they are not needed.  However, all subroutine input/output arguments need to have an `intent` label (you may refer to `src/atmos_phys/kessler` and `src/atmos_phys/held_suarez` for specific examples).
+
+- `<module_name>_init`
+  - Add all code that is run only during the first time step (`nstep=0`).  Typically fold `register` and `init` routines in current CAM into this routine.
+
+- `<module_name>_timestep_init`
+  - Add all pre-processing code needed by the scheme at the start of each timestep.  This may contain code from the CAM interface routine which prepares data for the run routine at each timestep.
+
+- `<module_name>_run`
+  - This is the workhorse routine which is run at each timestep.  The bulk of your ported code will likely be here.
+
+- `<module_name>_timestep_final`
+  - Add all post-processing code needed by the scheme at the end of each timestep.  This may contain code from the CAM interface routine which manipulates data after the run routine at each timestep.
+
+- `<module_name>_final`
+  - Most current CAM routines do not have code in this category.  This code is run once at the very end of the job.
 
